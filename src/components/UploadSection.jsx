@@ -5,10 +5,13 @@ import "../styles/UploadSection.css";
 import ProgressBar from "./ProgressBar";
 import AIProcessing from "./AIProcessing";
 import ResultsDashboard from "./ResultsDashboard";
-import StoryboardViewer from "./StoryboardViewer";
+import StoryboardViewer from "../pages/StoryboardViewer";
+import { useNavigate } from "react-router-dom";
 
-function UploadSection() {
-    const [showStoryboard, setShowStoryboard] = useState(false);
+function UploadSection({ setStoryboard }) {
+    const navigate = useNavigate();
+    const [story, setStory] = useState("");
+    const [loading, setLoading] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [isDragging, setIsDragging] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -17,6 +20,33 @@ function UploadSection() {
     const [currentStep, setCurrentStep] = useState(0);
     const [showResults, setShowResults] = useState(false);
     const [showBurst, setShowBurst] = useState(false);
+    const generateStoryboard = async () => {
+        if (!story.trim()) return;
+
+        try {
+            setLoading(true);
+
+            const res = await fetch("http://localhost:5000/storyboard", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ story })
+            });
+
+            const data = await res.json();
+
+            const parsed = JSON.parse(data.output);
+            setStoryboard(parsed);
+
+            navigate("/viewer");
+
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
     const handleFileChange = (event) => {
         const file = event.target.files[0];
 
@@ -26,6 +56,13 @@ function UploadSection() {
             setProgress(0);
             setShowBurst(false);
             setSelectedFile(file);
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                setStory(e.target.result);
+            };
+
+            reader.readAsText(file);
             setShowResults(false);
         }
     };
@@ -200,18 +237,15 @@ function UploadSection() {
                         )}
 
                         {showResults && (
-
-                            <ResultsDashboard
-                                onOpenStoryboard={() => setShowStoryboard(true)}
-                            />
-
+                            <button
+                                onClick={generateStoryboard}
+                                disabled={loading}
+                                className="upload-button"
+                            >
+                                {loading ? "Generating..." : "Start Creating 🚀"}
+                            </button>
                         )}
 
-                        {showStoryboard && (
-
-                            <StoryboardViewer />
-
-                        )}
                     </div>
 
                 )}

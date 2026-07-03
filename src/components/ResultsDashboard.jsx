@@ -1,6 +1,7 @@
 import "../styles/ResultsDashboard.css";
 import { motion, animate } from "framer-motion";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function AnimatedNumber({ value, delay = 0 }) {
 
@@ -35,6 +36,7 @@ function AnimatedNumber({ value, delay = 0 }) {
 }
 
 function ResultsDashboard({ onOpenStoryboard }) {
+    const navigate = useNavigate();
     const stats = [
 
         {
@@ -141,7 +143,7 @@ function ResultsDashboard({ onOpenStoryboard }) {
 
             <button
                 className="open-button"
-                onClick={onOpenStoryboard}
+                onClick={() => navigate("/viewer")}
             >
 
                 🚀 Open Storyboard
