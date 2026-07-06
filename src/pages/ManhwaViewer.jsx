@@ -2,6 +2,8 @@ import "../styles/ManhwaViewer.css";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
+import { updateProjectData } from "../utils/db";
+import { isLoggedIn } from "../utils/auth";
 
 function loadInitialBoard(storyboard) {
     if (storyboard) return storyboard;
@@ -82,6 +84,15 @@ function ManhwaViewer({ storyboard }) {
             const updatedBoard = { ...board, scenes: updatedScenes };
             setBoard(updatedBoard);
             localStorage.setItem("storyboard", JSON.stringify(updatedBoard));
+
+            const projectId = localStorage.getItem("storyboardProjectId");
+            if (isLoggedIn() && projectId) {
+                try {
+                    await updateProjectData(projectId, updatedBoard);
+                } catch (err) {
+                    console.error("Failed to persist regenerated image to library:", err);
+                }
+            }
 
         } catch (err) {
             console.error("Regenerate error:", err);
@@ -179,6 +190,13 @@ function ManhwaViewer({ storyboard }) {
                                         {regeneratingId === scene.id ? "Regenerating…" : "🔄 Regenerate"}
                                     </button>
                                 </div>
+
+                                {regeneratingId === scene.id && (
+                                    <p className="regenerate-note">
+                                        ⏳ This can take up to 30 seconds — please don't refresh or navigate away.
+                                    </p>
+                                )}
+
 
                                 <p>{scene.description}</p>
 

@@ -89,3 +89,13 @@
 .delete-btn:hover {
     background: rgba(239, 68, 68, .3) !important;
 }
+
+.projects-empty a {
+    color: #a78bfa;
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+.projects-empty a:hover {
+    color: #c4b5fd;
+}

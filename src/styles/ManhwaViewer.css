@@ -285,3 +285,9 @@
         page-break-inside: avoid;
     }
 }
+
+.regenerate-note {
+    color: #a78bfa;
+    font-size: 13px;
+    margin-bottom: 14px;
+}

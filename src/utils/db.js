@@ -2,6 +2,31 @@ import { openDatabase } from "./indexedDB";
 
 const STORE_NAME = "projects";
 
+export async function updateProjectData(id, data) {
+    const db = await openDatabase();
+
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, "readwrite");
+        const store = tx.objectStore(STORE_NAME);
+        const getReq = store.get(id);
+
+        getReq.onsuccess = () => {
+            const record = getReq.result;
+            if (!record) {
+                resolve(false);
+                return;
+            }
+            record.data = data;
+            record.sceneCount = data.scenes ? data.scenes.length : record.sceneCount;
+            store.put(record);
+        };
+
+        getReq.onerror = () => reject(getReq.error);
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => reject(tx.error);
+    });
+}
+
 export async function saveProject(storyboard, userId) {
     const db = await openDatabase();
 

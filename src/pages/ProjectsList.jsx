@@ -33,6 +33,7 @@ function ProjectsList() {
 
     function openProject(project, view) {
         localStorage.setItem("storyboard", JSON.stringify(project.data));
+        localStorage.setItem("storyboardProjectId", project.id);
         navigate(view === "manhwa" ? "/manhwa" : "/viewer");
     }
 
