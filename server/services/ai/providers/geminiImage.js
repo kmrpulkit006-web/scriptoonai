@@ -4,11 +4,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const GENERATED_DIR = path.join(__dirname, "..", "..", "..", "public", "generated");
 
-if (!fs.existsSync(GENERATED_DIR)) {
-    fs.mkdirSync(GENERATED_DIR, { recursive: true });
-}
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY_2 });
 
@@ -27,13 +23,20 @@ async function urlToInlinePart(url) {
     };
 }
 
-function saveImageAndGetUrl(base64Data, mimeType) {
-    const ext = (mimeType.split("/")[1] || "png").split("+")[0];
-    const filename = `${Date.now()}-${Math.floor(Math.random() * 1e6)}.${ext}`;
-    const filepath = path.join(GENERATED_DIR, filename);
-    fs.writeFileSync(filepath, Buffer.from(base64Data, "base64"));
-    const apiBaseUrl = process.env.VITE_API_URL || process.env.API_BASE_URL || "http://localhost:5000";
-    return `${apiBaseUrl.replace(/\/$/, "")}/generated/${filename}`;
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+async function saveImageAndGetUrl(base64Data, mimeType) {
+    const uploadResult = await cloudinary.uploader.upload(
+        `data:${mimeType};base64,${base64Data}`,
+        { folder: "scriptoonai-generated" }
+    );
+    return uploadResult.secure_url;
 }
 
 export async function generateGeminiImage(prompt, referenceImageUrls = []) {
@@ -56,5 +59,5 @@ export async function generateGeminiImage(prompt, referenceImageUrls = []) {
         throw new Error("Gemini did not return an image for this prompt.");
     }
 
-    return saveImageAndGetUrl(imagePart.inlineData.data, imagePart.inlineData.mimeType);
+    return await saveImageAndGetUrl(imagePart.inlineData.data, imagePart.inlineData.mimeType);
 }
