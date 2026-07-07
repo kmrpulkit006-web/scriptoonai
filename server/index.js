@@ -13,7 +13,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 app.use("/generated", express.static(path.join(__dirname, "public", "generated")));
 
 app.use(cors({
-  origin: ["https://narraframe.vercel.app", "http://localhost:5173"],
+  origin: ["https://scriptoonai.vercel.app", "http://localhost:5173"],
   credentials: true
 }));
 app.use(express.json());
@@ -23,7 +23,7 @@ app.use("/auth", authRoutes);
 
 app.get("/", (req, res) => {
   res.json({
-    message: "NarraFrame API Running 🚀"
+    message: "Scriptoon AI API Running 🚀"
   });
 });
 
