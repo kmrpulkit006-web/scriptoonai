@@ -5,7 +5,6 @@ import { useRef, useState, useEffect } from "react";
 import { updateProjectData } from "../utils/db";
 import { isLoggedIn } from "../utils/auth";
 import { buildApiUrl } from "../utils/api";
-import { buildApiUrl } from "../utils/api";
 
 const MIN_DISPLAY_MS = 5000;
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -22,56 +21,6 @@ function loadInitialBoard(storyboard) {
     }
 }
 
-async function regenerateScene(sceneIndex) {
-    const scene = board.scenes[sceneIndex];
-    setRegeneratingId(scene.id);
-
-    const variedSeed = board.seed + Math.floor(Math.random() * 100000) + 1;
-
-    try {
-        const [res] = await Promise.all([
-            fetch(buildApiUrl("/generate-image"), {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    scene,
-                    characters: board.characters,
-                    seed: variedSeed
-                })
-            }),
-            wait(MIN_DISPLAY_MS)
-        ]);
-
-        const data = await res.json();
-
-        if (!res.ok) {
-            console.error(`Regenerate failed for "${scene.title}":`, data.error);
-            return;
-        }
-
-        const updatedScenes = board.scenes.map((s, i) =>
-            i === sceneIndex ? { ...s, image: data.imageUrl } : s
-        );
-
-        const updatedBoard = { ...board, scenes: updatedScenes };
-        setBoard(updatedBoard);
-        localStorage.setItem("storyboard", JSON.stringify(updatedBoard));
-
-        const projectId = localStorage.getItem("storyboardProjectId");
-        if (isLoggedIn() && projectId) {
-            try {
-                await updateProjectData(projectId, updatedBoard);
-            } catch (err) {
-                console.error("Failed to persist regenerated image to library:", err);
-            }
-        }
-
-    } catch (err) {
-        console.error("Regenerate error:", err);
-    } finally {
-        setRegeneratingId(null);
-    }
-}
 function ManhwaViewer({ storyboard }) {
     const navigate = useNavigate();
     const sceneRefs = useRef([]);
@@ -115,15 +64,18 @@ function ManhwaViewer({ storyboard }) {
         const variedSeed = board.seed + Math.floor(Math.random() * 100000) + 1;
 
         try {
-            const res = await fetch(buildApiUrl("/generate-image"), {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    scene,
-                    characters: board.characters,
-                    seed: variedSeed
-                })
-            });
+            const [res] = await Promise.all([
+                fetch(buildApiUrl("/generate-image"), {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        scene,
+                        characters: board.characters,
+                        seed: variedSeed
+                    })
+                }),
+                wait(MIN_DISPLAY_MS)
+            ]);
 
             const data = await res.json();
 
