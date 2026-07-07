@@ -6,7 +6,7 @@ function LandingSections() {
         <>
             <section id="features" className="landing-section">
                 <h2>Features</h2>
-                <p className="section-subtitle">Everything NarraFrame does, built into one flow.</p>
+                <p className="section-subtitle">Everything Scriptoon AI does, built into one flow.</p>
 
                 <div className="feature-grid">
                     <motion.div className="feature-card" whileHover={{ y: -6 }}>
@@ -88,17 +88,17 @@ function LandingSections() {
                         <li>✓ Classic & webtoon viewers</li>
                         <li>✓ Optional free account for saved projects</li>
                     </ul>
-                    <p className="pricing-footnote">NarraFrame is a personal project, free to use while in active development.</p>
+                    <p className="pricing-footnote">Scriptoon AI is a personal project, free to use while in active development.</p>
                 </div>
             </section>
 
             <section id="about" className="landing-section">
                 <h2>About</h2>
-                <p className="section-subtitle">Why NarraFrame exists.</p>
+                <p className="section-subtitle">Why Scriptoon AI exists.</p>
 
                 <div className="about-content">
                     <p>
-                        NarraFrame started as an experiment: what does it take to turn a written story into a manhwa-style
+                        Scriptoon AI started as an experiment: what does it take to turn a written story into a manhwa-style
                         storyboard, using free and accessible AI tools? It's still evolving, one feature at a time.
                     </p>
                     <p>

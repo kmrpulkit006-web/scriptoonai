@@ -15,7 +15,7 @@ function Hero() {
                 transition={{ duration: 0.6 }}
             >
                 <Sparkles size={18} />
-                <span>NarraFrame • AI Storyboard Studio</span>
+                <span>Scriptoon AI • AI Storyboard Studio</span>
             </motion.div>
 
             <motion.h1
@@ -34,7 +34,7 @@ function Hero() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
             >
-                Transform Stories into Cinematic Storyboards using AI. Upload your novel, screenplay, manga, or fanfiction and watch NarraFrame bring your imagination to life.
+                Transform Stories into Cinematic Storyboards using AI. Upload your novel, screenplay, manga, or fanfiction and watch Scriptoon AI bring your imagination to life.
             </motion.p>
 
             <motion.div

@@ -52,7 +52,7 @@ function Signup() {
         <div className="auth-page">
             <form className="auth-card" onSubmit={handleSubmit}>
                 <h1>Create Account</h1>
-                <p className="auth-subtitle">Join NarraFrame</p>
+                <p className="auth-subtitle">Join Scriptoon AI</p>
 
                 {error && <div className="auth-error">{error}</div>}
 

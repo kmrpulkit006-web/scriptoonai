@@ -45,7 +45,7 @@ function Login() {
         <div className="auth-page">
             <form className="auth-card" onSubmit={handleSubmit}>
                 <h1>Welcome Back</h1>
-                <p className="auth-subtitle">Log in to NarraFrame</p>
+                <p className="auth-subtitle">Log in to Scriptoon AI</p>
 
                 {error && <div className="auth-error">{error}</div>}
 

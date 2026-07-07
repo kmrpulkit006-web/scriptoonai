@@ -106,7 +106,7 @@ function Logo() {
 
             <span>
 
-                NarraFrame
+                Scriptoon AI
 
             </span>
 

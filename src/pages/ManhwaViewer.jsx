@@ -116,7 +116,7 @@ function ManhwaViewer({ storyboard }) {
                     ← Classic View
                 </button>
 
-                <h2>NarraFrame</h2>
+                <h2>Scriptoon AI</h2>
 
                 {board.scenes.map((scene, index) => (
                     <div

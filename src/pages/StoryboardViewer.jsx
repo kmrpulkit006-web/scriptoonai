@@ -44,7 +44,7 @@ function StoryboardViewer({ storyboard }) {
                     ← Back
                 </button>
 
-                <h2>NarraFrame</h2>
+                <h2>Scriptoon AI</h2>
 
                 {storyboard.scenes.map((scene, index) => (
                     <div

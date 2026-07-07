@@ -1,4 +1,4 @@
-const DB_NAME = "narraframe";
+const DB_NAME = "Scriptoon AI Database";
 const DB_VERSION = 2;
 
 export function openDatabase() {
