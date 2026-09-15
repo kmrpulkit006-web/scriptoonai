@@ -6,7 +6,7 @@ import { generateGeminiImage } from "./providers/geminiImage.js";
 
 const USE_GEMINI_IMAGES = process.env.USE_GEMINI_IMAGES === "true";
 
-export async function generateImage(prompt, seed, model, referenceImages) {
+export async function generateImage(prompt, seed, model, referenceImages = []) {
     if (USE_GEMINI_IMAGES) {
         try {
             const url = await generateGeminiImage(prompt, referenceImages);
@@ -17,5 +17,7 @@ export async function generateImage(prompt, seed, model, referenceImages) {
         }
     }
 
-    return await generatePollinationsImage(prompt, seed, "flux", []);
+    // Public Pollinations API supports "flux"; "kontext" requires enter.pollinations.ai authentication
+    const pollinationsModel = (model && model !== "kontext") ? model : "flux";
+    return await generatePollinationsImage(prompt, seed, pollinationsModel, []);
 }

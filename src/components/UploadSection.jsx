@@ -152,10 +152,11 @@ function UploadSection({ setStoryboard }) {
                 }
                 setGenCached(false);
 
+                const sceneSeed = (projectSeed + (sceneIndex + 1) * 7919) % 1_000_000;
                 const imageRes = await fetch(buildApiUrl("/generate-image"), {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ scene, characters: parsed.characters, seed: projectSeed })
+                    body: JSON.stringify({ scene, characters: parsed.characters, seed: sceneSeed })
                 });
 
                 const imageData = await imageRes.json();

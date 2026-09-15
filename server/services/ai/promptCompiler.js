@@ -1,10 +1,4 @@
-const MANHWA_STYLE = `
-Style:
-Manhwa / Korean webtoon art style.
-Clean digital linework, cel-shaded coloring, vibrant flat colors, sharp outlines.
-Maintain identical character appearance, proportions, and outfit across every single panel.
-No text, no watermarks, no signatures, no panel borders.
-`;
+const BASE_MANHWA_STYLE = `Korean webtoon manhwa art style, clean digital linework, vibrant cel-shaded coloring, sharp outlines.`;
 
 function describeCharacter(character) {
     const fields = [
@@ -17,9 +11,9 @@ function describeCharacter(character) {
     ]
         .filter(([, value]) => value && value.trim() !== "")
         .map(([label, value]) => `${label}: ${value}`)
-        .join("\n");
+        .join(", ");
 
-    return `${character.name}\n${fields}`;
+    return `${character.name} (${fields})`;
 }
 
 function summarizeCharacterForScene(character) {
@@ -30,9 +24,8 @@ function summarizeCharacterForScene(character) {
     return details ? `${character.name} (${details})` : character.name;
 }
 
-export function buildPrompt(scene, characters) {
-
-    const sceneCharacters = scene.characters
+export function buildPrompt(scene, characters = []) {
+    const sceneCharacters = (scene.characters || [])
         .map(name => characters.find(c => c.name === name))
         .filter(Boolean);
 
@@ -40,35 +33,29 @@ export function buildPrompt(scene, characters) {
         .map(summarizeCharacterForScene)
         .join("; ");
 
-    return `
-${MANHWA_STYLE}
+    const parts = [
+        BASE_MANHWA_STYLE,
+        "Single cinematic manhwa panel, single camera perspective, full scene illustration.",
+        scene.description ? `Scene: ${scene.description}` : "",
+        scene.environment ? `Environment: ${scene.environment}` : "",
+        scene.action ? `Action: ${scene.action}` : "",
+        characterDescription ? `Characters in scene: ${characterDescription}` : "",
+        scene.camera ? `Camera shot: ${scene.camera}` : "",
+        scene.lighting ? `Lighting: ${scene.lighting}` : "",
+        scene.mood ? `Mood: ${scene.mood}` : "",
+        "Single unified image, one frame, no multiple panels, no split screen, no character sheet, no model turnaround grid, no sketches, no panel borders, no text, no speech bubbles, no watermark."
+    ].filter(Boolean);
 
-Characters:
-${characterDescription}
-
-Environment:
-${scene.environment}
-
-Action:
-${scene.action}
-
-Lighting:
-${scene.lighting}
-
-Camera:
-${scene.camera}
-
-Mood:
-${scene.mood}
-`;
+    return parts.join("\n\n");
 }
 
 export function buildCharacterPortraitPrompt(character) {
-    return `
-${MANHWA_STYLE}
+    const parts = [
+        BASE_MANHWA_STYLE,
+        "Single solo character reference portrait, front-facing, waist-up view, plain neutral background, clear view of face and outfit, single subject.",
+        describeCharacter(character),
+        "Single unified portrait, no multiple panels, no character sheet grid, no sketches, no turnaround collage, no text, no watermark."
+    ].filter(Boolean);
 
-Character reference portrait. Front-facing, plain neutral background, upper body shot, clear view of face and outfit.
-
-${describeCharacter(character)}
-`;
+    return parts.join("\n\n");
 }
