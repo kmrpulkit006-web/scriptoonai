@@ -85,7 +85,11 @@ function UploadSection({ setStoryboard }) {
 
     const proceedWithGeneration = async () => {
         if (!pendingParsed) return;
-        const parsed = pendingParsed;
+        const parsed = {
+            ...pendingParsed,
+            characters: pendingParsed.characters.map((character) => ({ ...character })),
+            scenes: pendingParsed.scenes.map((scene) => ({ ...scene }))
+        };
 
         if (forceNewSeedFlag) {
             parsed.seed = Math.floor(Math.random() * 1_000_000);
@@ -118,15 +122,13 @@ function UploadSection({ setStoryboard }) {
                 const refRes = await fetch(buildApiUrl("/generate-image"), {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ character, seed: projectSeed })
+                    body: JSON.stringify({ character, seed: (projectSeed + (charIndex + 1) * 104729) % 1_000_000 })
                 });
 
                 const refData = await refRes.json();
 
                 if (!refRes.ok) {
-                    console.error(`Reference image failed for ${character.name}:`, refData.error);
-                    await sleep(15000);
-                    continue;
+                    throw new Error(`Reference image generation failed for ${character.name}: ${refData.error || "Unknown error"}`);
                 }
 
                 character.referenceImage = refData.imageUrl;
@@ -162,9 +164,7 @@ function UploadSection({ setStoryboard }) {
                 const imageData = await imageRes.json();
 
                 if (!imageRes.ok) {
-                    console.error(`Image generation failed for scene "${scene.title}":`, imageData.error);
-                    await sleep(15000);
-                    continue;
+                    throw new Error(`Image generation failed for "${scene.title}": ${imageData.error || "Unknown error"}`);
                 }
 
                 scene.image = imageData.imageUrl;
@@ -192,7 +192,7 @@ function UploadSection({ setStoryboard }) {
 
         } catch (err) {
             console.error(err);
-            alert("Something went wrong during image generation. Please try again.");
+            alert(err.message || "Something went wrong during image generation. Please try again.");
         } finally {
             setLoading(false);
         }

@@ -1,4 +1,4 @@
-const BASE_MANHWA_STYLE = `Korean webtoon manhwa art style, clean digital linework, vibrant cel-shaded coloring, sharp outlines.`;
+const BASE_MANHWA_STYLE = "Korean webtoon manhwa illustration, clean digital linework, vibrant cel-shaded coloring.";
 
 function describeCharacter(character) {
     const fields = [
@@ -34,28 +34,26 @@ export function buildPrompt(scene, characters = []) {
         .join("; ");
 
     const parts = [
-        BASE_MANHWA_STYLE,
-        "Single cinematic manhwa panel, single camera perspective, full scene illustration.",
-        scene.description ? `Scene: ${scene.description}` : "",
-        scene.environment ? `Environment: ${scene.environment}` : "",
-        scene.action ? `Action: ${scene.action}` : "",
-        characterDescription ? `Characters in scene: ${characterDescription}` : "",
-        scene.camera ? `Camera shot: ${scene.camera}` : "",
-        scene.lighting ? `Lighting: ${scene.lighting}` : "",
-        scene.mood ? `Mood: ${scene.mood}` : "",
-        "Single unified image, one frame, no multiple panels, no split screen, no character sheet, no model turnaround grid, no sketches, no panel borders, no text, no speech bubbles, no watermark."
+        scene.camera ? `${scene.camera} of this scene:` : "A wide cinematic shot of this scene:",
+        scene.description,
+        scene.environment ? `Setting: ${scene.environment}.` : "",
+        scene.action ? `Action: ${scene.action}.` : "",
+        characterDescription ? `Characters in the scene: ${characterDescription}.` : "",
+        scene.lighting ? `Lighting: ${scene.lighting}.` : "",
+        scene.mood ? `Mood: ${scene.mood}.` : "",
+        "One single continuous illustration filling the whole frame, characters placed naturally inside the detailed environment.",
+        BASE_MANHWA_STYLE
     ].filter(Boolean);
 
-    return parts.join("\n\n");
+    return parts.join(" ");
 }
 
 export function buildCharacterPortraitPrompt(character) {
     const parts = [
-        BASE_MANHWA_STYLE,
-        "Single solo character reference portrait, front-facing, waist-up view, plain neutral background, clear view of face and outfit, single subject.",
+        "Portrait of one single person, front-facing, waist-up, centered, soft plain background.",
         describeCharacter(character),
-        "Single unified portrait, no multiple panels, no character sheet grid, no sketches, no turnaround collage, no text, no watermark."
+        BASE_MANHWA_STYLE
     ].filter(Boolean);
 
-    return parts.join("\n\n");
+    return parts.join(" ");
 }

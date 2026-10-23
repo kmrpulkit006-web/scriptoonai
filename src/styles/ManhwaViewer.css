@@ -7,6 +7,7 @@
 
 .sidebar{
     width:260px;
+    box-sizing: border-box;
     padding:30px;
     background:#111827;
     border-right:1px solid rgba(255,255,255,.08);
@@ -54,6 +55,7 @@
 
 .workspace {
     flex: 1;
+    min-width: 0;
     padding: 35px;
     margin-left: 260px;
 }
@@ -111,6 +113,13 @@
     width: 100%;
     height: auto;
     display: block;
+}
+
+.image-unavailable {
+    padding: 24px;
+    color: #cbd5e1;
+    font-size: 16px;
+    text-align: center;
 }
 
 .panel-info {
@@ -183,6 +192,10 @@
     box-shadow: 0 8px 20px rgba(0, 0, 0, .35);
     position: relative;
     font-size: 14px;
+}
+
+.speech-bubble .line-text {
+    overflow-wrap: anywhere;
 }
 
 .speech-bubble.left {
@@ -290,4 +303,55 @@
     color: #a78bfa;
     font-size: 13px;
     margin-bottom: 14px;
+}
+
+.regenerate-error,
+.save-warning {
+    color: #fbbf24;
+    line-height: 1.5;
+}
+
+.save-warning {
+    max-width: 700px;
+    margin: 0 auto 24px;
+}
+
+@media (max-width: 760px) {
+    .viewer {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        position: static;
+        width: 100%;
+        height: auto;
+        max-height: 35vh;
+        padding: 18px;
+        border-right: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, .08);
+    }
+
+    .sidebar h2 {
+        margin-bottom: 16px;
+    }
+
+    .scene {
+        display: inline-block;
+        max-width: 100%;
+        margin: 0 8px 8px 0;
+        padding: 10px 12px;
+    }
+
+    .workspace {
+        margin-left: 0;
+        padding: 20px 16px;
+    }
+
+    .panel-image {
+        min-height: 240px;
+    }
+
+    .panel-info {
+        padding: 16px;
+    }
 }

@@ -38,5 +38,5 @@ export async function setCachedImage(key, imageUrl) {
 }
 
 export function buildCacheKey(payload) {
-    return JSON.stringify(payload);
+    return JSON.stringify({ v: 3, ...payload });
 }

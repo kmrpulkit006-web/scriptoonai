@@ -27,6 +27,9 @@ function ManhwaViewer({ storyboard }) {
     const [board, setBoard] = useState(() => loadInitialBoard(storyboard));
     const [regeneratingId, setRegeneratingId] = useState(null);
     const [activeIndex, setActiveIndex] = useState(0);
+    const [failedImages, setFailedImages] = useState({});
+    const [regenerateError, setRegenerateError] = useState({});
+    const [saveWarning, setSaveWarning] = useState("");
 
     useEffect(() => {
         if (!board) return;
@@ -60,6 +63,7 @@ function ManhwaViewer({ storyboard }) {
     async function regenerateScene(sceneIndex) {
         const scene = board.scenes[sceneIndex];
         setRegeneratingId(scene.id);
+        setRegenerateError((previous) => ({ ...previous, [scene.id]: "" }));
 
         const variedSeed = board.seed + Math.floor(Math.random() * 100000) + 1;
 
@@ -78,10 +82,8 @@ function ManhwaViewer({ storyboard }) {
             ]);
 
             const data = await res.json();
-
             if (!res.ok) {
-                console.error(`Regenerate failed for "${scene.title}":`, data.error);
-                return;
+                throw new Error(data.error || "The image service could not generate this panel.");
             }
 
             const updatedScenes = board.scenes.map((s, i) =>
@@ -91,6 +93,8 @@ function ManhwaViewer({ storyboard }) {
             const updatedBoard = { ...board, scenes: updatedScenes };
             setBoard(updatedBoard);
             localStorage.setItem("storyboard", JSON.stringify(updatedBoard));
+            setFailedImages((previous) => ({ ...previous, [scene.id]: false }));
+            setSaveWarning("");
 
             const projectId = localStorage.getItem("storyboardProjectId");
             if (isLoggedIn() && projectId) {
@@ -98,11 +102,18 @@ function ManhwaViewer({ storyboard }) {
                     await updateProjectData(projectId, updatedBoard);
                 } catch (err) {
                     console.error("Failed to persist regenerated image to library:", err);
+                    setSaveWarning(
+                        "The panel was regenerated in this browser but could not be synced to your library. Your session may have expired; log in again to sync changes."
+                    );
                 }
             }
 
         } catch (err) {
             console.error("Regenerate error:", err);
+            setRegenerateError((previous) => ({
+                ...previous,
+                [scene.id]: err.message || "The panel could not be regenerated."
+            }));
         } finally {
             setRegeneratingId(null);
         }
@@ -143,6 +154,8 @@ function ManhwaViewer({ storyboard }) {
                     </button>
                 </div>
 
+                {saveWarning && <p className="save-warning" role="status">{saveWarning}</p>}
+
                 <div className="webtoon-scroll">
                     {board.scenes.map((scene, index) => (
                         <motion.div
@@ -156,14 +169,16 @@ function ManhwaViewer({ storyboard }) {
                             transition={{ duration: 0.5 }}
                         >
                             <div className="panel-image">
-                                {scene.image ? (
+                                {scene.image && !failedImages[scene.id] ? (
                                     <img
                                         src={scene.image}
                                         alt={scene.title}
-                                        onError={(e) => console.error("Image failed to load:", e.target.src)}
+                                        onError={() => setFailedImages((previous) => ({ ...previous, [scene.id]: true }))}
                                     />
                                 ) : (
-                                    "🎬"
+                                    <span className="image-unavailable">
+                                        {failedImages[scene.id] ? "Image unavailable · Regenerate this panel" : "🎬"}
+                                    </span>
                                 )}
 
                                 {scene.dialogue && scene.dialogue.filter(d => d.line && d.line.trim() !== "").length > 0 && (
@@ -202,6 +217,9 @@ function ManhwaViewer({ storyboard }) {
                                     <p className="regenerate-note">
                                         ⏳ This can take up to 30 seconds — please don't refresh or navigate away.
                                     </p>
+                                )}
+                                {regenerateError[scene.id] && (
+                                    <p className="regenerate-error" role="alert">{regenerateError[scene.id]}</p>
                                 )}
 
 

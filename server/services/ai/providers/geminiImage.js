@@ -1,16 +1,21 @@
 import { GoogleGenAI } from "@google/genai";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+import { saveImageAndGetUrl } from "../imageStorage.js";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+let ai;
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY_2 });
+function getGeminiClient() {
+    if (!process.env.GEMINI_API_KEY) {
+        throw new Error("GEMINI_API_KEY is required for Gemini image generation.");
+    }
+
+    ai ??= new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    return ai;
+}
 
 async function urlToInlinePart(url) {
     const response = await fetch(url);
     if (!response.ok) {
-        throw new Error(`Failed to fetch reference image: ${url}`);
+        throw new Error(`Failed to fetch reference image (${response.status}).`);
     }
     const mimeType = response.headers.get("content-type") || "image/png";
     const buffer = Buffer.from(await response.arrayBuffer());
@@ -22,37 +27,6 @@ async function urlToInlinePart(url) {
     };
 }
 
-let cloudinary = null;
-
-try {
-    const cloudinaryModule = await import("cloudinary");
-    cloudinary = cloudinaryModule.v2;
-    cloudinary.config({
-        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-        api_key: process.env.CLOUDINARY_API_KEY,
-        api_secret: process.env.CLOUDINARY_API_SECRET,
-    });
-} catch (error) {
-    console.warn("Cloudinary unavailable, falling back to local file storage:", error.message);
-}
-
-async function saveImageAndGetUrl(base64Data, mimeType) {
-    if (!cloudinary) {
-        const ext = (mimeType.split("/")[1] || "png").split("+")[0];
-        const filename = `${Date.now()}-${Math.floor(Math.random() * 1e6)}.${ext}`;
-        const filepath = path.join(__dirname, "..", "..", "..", "public", "generated", filename);
-        fs.mkdirSync(path.dirname(filepath), { recursive: true });
-        fs.writeFileSync(filepath, Buffer.from(base64Data, "base64"));
-        return `https://scriptoonai.onrender.com/generated/${filename}`;
-    }
-
-    const uploadResult = await cloudinary.uploader.upload(
-        `data:${mimeType};base64,${base64Data}`,
-        { folder: "scriptoonai-generated" }
-    );
-    return uploadResult.secure_url;
-}
-
 export async function generateGeminiImage(prompt, referenceImageUrls = []) {
     const parts = [];
 
@@ -62,9 +36,12 @@ export async function generateGeminiImage(prompt, referenceImageUrls = []) {
 
     parts.push({ text: prompt });
 
-    const response = await ai.models.generateContent({
+    const response = await getGeminiClient().models.generateContent({
         model: "gemini-2.5-flash-image",
-        contents: parts
+        contents: parts,
+        config: {
+            responseModalities: ["IMAGE"]
+        }
     });
 
     const imagePart = response.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
@@ -73,5 +50,8 @@ export async function generateGeminiImage(prompt, referenceImageUrls = []) {
         throw new Error("Gemini did not return an image for this prompt.");
     }
 
-    return await saveImageAndGetUrl(imagePart.inlineData.data, imagePart.inlineData.mimeType);
+    return await saveImageAndGetUrl(
+        Buffer.from(imagePart.inlineData.data, "base64"),
+        imagePart.inlineData.mimeType
+    );
 }

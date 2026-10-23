@@ -1,9 +1,9 @@
 import { buildApiUrl } from "./api";
-import { getToken } from "./auth";
+import { clearSession, getToken } from "./auth";
 
 async function authFetch(url, options = {}) {
     const token = getToken();
-    return fetch(url, {
+    const response = await fetch(url, {
         ...options,
         headers: {
             "Content-Type": "application/json",
@@ -11,6 +11,12 @@ async function authFetch(url, options = {}) {
             ...(options.headers || {})
         }
     });
+
+    if (response.status === 401 && token) {
+        clearSession();
+    }
+
+    return response;
 }
 
 export async function updateProjectData(id, data) {
