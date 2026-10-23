@@ -15,6 +15,13 @@ export async function generateImage(prompt, seed, model, referenceImages = []) {
             return url;
         } catch (err) {
             if (!process.env.POLLINATIONS_API_KEY) {
+                const quotaExceeded = /429|RESOURCE_EXHAUSTED|quota/i.test(err.message);
+                if (quotaExceeded) {
+                    throw new Error(
+                        "Gemini image-generation quota is exhausted. Enable image-model billing/quota in Google AI Studio, or configure POLLINATIONS_API_KEY for the fallback."
+                    );
+                }
+
                 throw new Error(`Gemini image generation failed: ${err.message}`);
             }
             console.warn("⚠️ Gemini image generation failed, falling back to Pollinations:", err.message);
