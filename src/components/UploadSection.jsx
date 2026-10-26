@@ -46,6 +46,7 @@ function UploadSection({ setStoryboard }) {
     const [pendingParsed, setPendingParsed] = useState(null);
     const [reviewingCharacters, setReviewingCharacters] = useState(false);
     const [forceNewSeedFlag, setForceNewSeedFlag] = useState(false);
+    const [sessionExpired, setSessionExpired] = useState(false);
 
     const [genPhase, setGenPhase] = useState("");
     const [genIndex, setGenIndex] = useState(0);
@@ -77,7 +78,7 @@ function UploadSection({ setStoryboard }) {
 
         } catch (err) {
             console.error(err);
-            alert("🚦 Gemini is currently experiencing high demand.\n\nPlease wait 20-30 seconds and try again.");
+            alert(`Story analysis failed: ${err.message || "Please try again."}`);
         } finally {
             setLoading(false);
         }
@@ -207,6 +208,11 @@ function UploadSection({ setStoryboard }) {
             const trimmedStory = story.trim();
             return all.find(p => p.data?.sourceText && p.data.sourceText.trim() === trimmedStory) || null;
         } catch (err) {
+            if (!isLoggedIn()) {
+                setSessionExpired(true);
+                return null;
+            }
+
             console.error("Failed to check for duplicate project:", err);
             return null;
         }
@@ -415,13 +421,22 @@ function UploadSection({ setStoryboard }) {
                         )}
 
                         {showResults && (
-                            <button
-                                onClick={handleStartCreating}
-                                disabled={loading || checkingDuplicate}
-                                className="upload-button"
-                            >
-                                {checkingDuplicate ? "Checking..." : loading ? "Analyzing..." : "Start Creating 🚀"}
-                            </button>
+                            <>
+                                {sessionExpired && (
+                                    <p className="session-expired-notice" role="status">
+                                        Your login session expired. You can continue as a guest, or{" "}
+                                        <button type="button" onClick={() => navigate("/login")}>log in again</button>
+                                        {" "}to check your saved projects.
+                                    </p>
+                                )}
+                                <button
+                                    onClick={handleStartCreating}
+                                    disabled={loading || checkingDuplicate}
+                                    className="upload-button"
+                                >
+                                    {checkingDuplicate ? "Checking..." : loading ? "Analyzing..." : "Start Creating 🚀"}
+                                </button>
+                            </>
                         )}
 
                         {loading && genPhase && (
